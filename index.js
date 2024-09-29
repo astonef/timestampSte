@@ -8,7 +8,7 @@ var app = express();
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC 
 var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.use(cors({ optionsSuccessStatus: 200 }));  // some legacy browsers choke on 204
 
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
@@ -18,40 +18,41 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
-});
+// Function to check if the date is invalid
+const isInvalidDate = (date) => date.toUTCString() === "Invalid Date";
 
-// Timestamp Microservice endpoint
-app.get("/api/:date?", (req, res) => {
-  let dateParam = req.params.date;
+// Endpoint for handling /api/:date
+app.get("/api/:date", function (req, res) {
+  let date = new Date(req.params.date);
 
-  // Se la data non è fornita, utilizza la data corrente
-  let date;
-  if (!dateParam) {
-    date = new Date();
-  } else {
-    // Se la data è un numero, convertila in intero
-    if (!isNaN(dateParam)) {
-      date = new Date(parseInt(dateParam));
-    } else {
-      date = new Date(dateParam);
-    }
+  // If the date is invalid, try parsing it as a number
+  if (isInvalidDate(date)) {
+    date = new Date(parseInt(req.params.date));
   }
 
-  // Controlla se la data è valida
-  if (date.toString() === "Invalid Date") {
-    return res.json({ error: "Invalid Date" });
+  // If still invalid, return the error response
+  if (isInvalidDate(date)) {
+    res.json({ error: "Invalid Date" });
+    return;
   }
 
+  // Return the valid response
   res.json({
     unix: date.getTime(),
     utc: date.toUTCString()
   });
 });
 
-// Listen on port set in environment variable or default to 3000
+// Endpoint for handling /api (current date)
+app.get('/api', function (req, res) {
+  const currentDate = new Date();
+  res.json({
+    unix: currentDate.getTime(),
+    utc: currentDate.toUTCString()
+  });
+});
+
+// listen for requests
 var listener = app.listen(process.env.PORT || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });

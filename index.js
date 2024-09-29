@@ -25,16 +25,14 @@ app.get("/api/hello", function (req, res) {
 
 // Timestamp Microservice endpoint
 app.get("/api/:date?", (req, res) => {
-  console.log("Request received at /api with date param:", req.params.date);
-
   let dateParam = req.params.date;
 
-  // If no date is provided, use the current date
+  // Se la data non è fornita, utilizza la data corrente
   let date;
   if (!dateParam) {
     date = new Date();
   } else {
-    // Check if the dateParam is a number (timestamp)
+    // Se la data è un numero, convertila in intero
     if (!isNaN(dateParam)) {
       date = new Date(parseInt(dateParam));
     } else {
@@ -42,7 +40,7 @@ app.get("/api/:date?", (req, res) => {
     }
   }
 
-  // Check if the date is valid
+  // Controlla se la data è valida
   if (date.toString() === "Invalid Date") {
     return res.json({ error: "Invalid Date" });
   }
@@ -52,6 +50,7 @@ app.get("/api/:date?", (req, res) => {
     utc: date.toUTCString()
   });
 });
+
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
